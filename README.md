@@ -74,7 +74,7 @@ spring.zipkin.base-url=http://localhost:9411/
 2.从网址：https://repo1.maven.org/maven2/io/zipkin/zipkin-server/2.17.2/zipkin-server-2.17.2-exec.jar
  下载jar(已下载在本项目中；如果需要其他版本，可去相应文件夹下载；是一个打包好的springBoot应用，springBoot自带tomcat因此只要启动JAR包就可以访问了。 java -jar zipkin-server-xxx.jar 启动完后访问 http://localhost:9411 可以查看统计界面)。
  
-3.创建 Elasticsearch 容器：https://www.cnblogs.com/cag2050/p/10267056.html
+3.下载elasticsearch镜像：`docker pull elasticsearch:7.4.0`，创建 Elasticsearch 容器：`docker run --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.4.0`，访问网址：http://localhost:9200/
 
 4.在项目目录下，使用下面命令启动 zipkin-server:
 ```
@@ -84,12 +84,14 @@ java -jar zipkin-server-2.17.2-exec.jar --STORAGE_TYPE=elasticsearch --ES_HOSTS=
 5.启动完成后，然后在浏览数上访问服务消费者：http://localhost:8505/hello，再访问http://localhost:9411/zipkin/，可以看到链路数据。这时链路数据存储在 ElasticSearch 中
 （可以通过谷歌浏览器扩展程序可视化界面：ElasticSearch Head 查看数据；该扩展程序下载说明：https://www.cnblogs.com/cag2050/p/10277101.html）。
 
-### 步骤七：在 Zipkin 上展示链路数据
-1.链路数据存储在ElasticSearch中，ElasticSearch可以和Kibana结合，将链路数据展示在Kibana上。
-
-2.安装完成Kibana后启动，Kibana默认会向本地端口为9200的ElasticSearch读取数据。Kibana默认的端口为5601，访问Kibana的主页 http://localhost:5601
-
-
+### 步骤七：在 Kibana 上展示链路数据
+1. 链路数据存储在ElasticSearch中，ElasticSearch可以和Kibana结合，将链路数据展示在Kibana上。
+2. 下载镜像：`docker pull kibana:7.4.0`，创建容器（Kibana 默认的端口为5601；kibana出现[Kibana server is not ready yet
+]问题的解决：ELASTICSEARCH_URL中指定的elasticsearch的容器地址最好是采用本机的ip地址 + 端口：https://blog.csdn.net/qq_38796327/article/details/90480314）：`docker run -p 5601:5601 --link elasticsearch -e
+ "ELASTICSEARCH_URL=http://192.168.1.7:9200" kibana:7.4.0`，访问网址：`http://localhost:5601`
+3. 安装完成Kibana后启动，Kibana默认会向本地端口为9200的ElasticSearch读取数据。Kibana默认的端口为5601，访问Kibana的主页 http://localhost:5601
+4. 在网址 http://localhost:5601 中，单击“Management”按钮，单击“Index patterns”，单击“Create index pattern”添加一个index。我们将在上节ElasticSearch中写入链路数据的index配置为“zipkin
+”，那么在界面填写为“zipkin-*”，单击“Next step”按钮，单击“Create index pattern”；创建完成index后，单击“Discover”，就可以在界面上展示链路数据了
 
 ### 参考
 参考资料 | 网址
