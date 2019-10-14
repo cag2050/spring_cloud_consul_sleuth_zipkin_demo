@@ -86,12 +86,21 @@ java -jar zipkin-server-2.17.2-exec.jar --STORAGE_TYPE=elasticsearch --ES_HOSTS=
 
 ### 步骤七：在 Kibana 上展示链路数据
 1. 链路数据存储在ElasticSearch中，ElasticSearch可以和Kibana结合，将链路数据展示在Kibana上。
-2. 下载镜像：`docker pull kibana:7.4.0`，创建容器（Kibana 默认的端口为5601；kibana出现[Kibana server is not ready yet
-]问题的解决：ELASTICSEARCH_URL中指定的elasticsearch的容器地址最好是采用本机的ip地址 + 端口：https://blog.csdn.net/qq_38796327/article/details/90480314）：`docker run -p 5601:5601 --link elasticsearch -e
+2. 下载镜像：`docker pull kibana:7.4.0`，创建容器（Kibana 默认的端口为5601；kibana出现[Kibana server is not ready yet]问题的解决：https://blog.csdn.net/qq_38796327/article/details/90480314；ELASTICSEARCH_URL中指定的elasticsearch的容器地址最好是采用本机的ip地址 + 端口）：`docker run -p 5601:5601 --link elasticsearch -e
  "ELASTICSEARCH_URL=http://192.168.1.7:9200" kibana:7.4.0`，访问网址：`http://localhost:5601`
 3. 安装完成Kibana后启动，Kibana默认会向本地端口为9200的ElasticSearch读取数据。Kibana默认的端口为5601，访问Kibana的主页 http://localhost:5601
-4. 在网址 http://localhost:5601 中，单击“Management”按钮，单击“Index patterns”，单击“Create index pattern”添加一个index。我们将在上节ElasticSearch中写入链路数据的index配置为“zipkin
+4. 在网址 http://localhost:5601 中，单击“Management”按钮，单击“Index patterns”，单击“Create index pattern”添加一个index。我们在上节ElasticSearch中写入链路数据的index配置为“zipkin
 ”，那么在界面填写为“zipkin-*”，单击“Next step”按钮，单击“Create index pattern”；创建完成index后，单击“Discover”，就可以在界面上展示链路数据了
+5.网址：http://localhost:5601/app/kibana#/visualize?_g=() ，创建一个图，就可以在图上看到记录数。
+6. 注意：Kibana 版本必须和 Elasticsearch 版本一样，否则 Kibana 会报错误：`Kibana server is not ready yet`。
+
+### 注意
+1.如果报错：
+```
+Fielddata is disabled on text fields by default. Set fielddata=true on [type] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead.
+```
+参考官方网站：https://www.elastic.co/guide/en/elasticsearch/reference/current/fielddata.html#enable-fielddata-text-fields
+ ，为字段添加 fielddata 属性。
 
 ### 参考
 参考资料 | 网址
